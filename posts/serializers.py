@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Like, Comment, Notification
+from .models import Post, Like, Comment, Notification, DirectMessage
 
 
 
@@ -46,3 +46,14 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['id', 'user', 'sender', 'post', 'notification_type', 'message', 'is_read', 'timestamp']
+
+
+# ============ Direct Message Serializer =============
+
+class DirectMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.ReadOnlyField(source='sender.username')
+    recipient = serializers.ReadOnlyField(source='recipient.username')
+
+    class Meta:
+        model = DirectMessage
+        fields = ['id', 'sender', 'recipient', 'content', 'is_read', 'timestamp']

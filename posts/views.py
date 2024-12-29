@@ -1,9 +1,10 @@
 from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Post, Like, Comment, Notification
+from .models import Post, Like, Comment, Notification, DirectMessage
 from users.models import Follow
-from .serializers import PostSerializer, LikeSerializer, CommentSerializer, NotificationSerializer
+from django.contrib.auth.models import User
+from .serializers import PostSerializer, LikeSerializer, CommentSerializer, NotificationSerializer, DirectMessageSerializer
 from rest_framework.pagination import PageNumberPagination
 from .utils import create_notification
 
@@ -153,3 +154,55 @@ class MarkNotificationAsReadView(APIView):
         notification.is_read = True
         notification.save()
         return Response({"detail": "Notification marked as read."}, status=status.HTTP_200_OK)
+    
+
+# ============ Direct Message Views =============
+
+class SendMessageView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        recipient_username = request.data.get("recipient")
+        content = request.data.get("content")
+
+        if not recipient_username or not content:
+            return Response({"detail": "Recipient and content are required."}, status=status.HTTP_400_BAD_REQUEST)
+        recipient = User.objects.filter(username=recipient_username).first()
+
+        if not recipient:
+            return Response({"detail": "Recipient not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if recipient == request.user:
+            return Response({"detail": "You can not send message to yourself."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        message = DirectMessage.objects.create(sender=request.user, recipient=recipient_username, content=content)
+        serializer = DirectMessageSerializer(message)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class InboxView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        messages = DirectMessage.objects.filter(sender=request.user).order_by('-timestamp')
+        serializer = DirectMessageSerializer(messages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class SentMessagesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        messages = DirectMessage.objects.filter(sender=request.user).order_by('-timestamp')
+        serializer = DirectMessageSerializer(messages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class MarkMessageAsReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def Post(self, request, message_id, *args, **kwargs):
+        message = DirectMessage.objects.filter(id=message_id, recipient=request.user).first()
+        if not message:
+            return Response({"detail": "Message not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        message.is_read = True
+        message.save()
+        return Response({"detail": "Message marked as read."}, status=status.HTTP_200_OK)

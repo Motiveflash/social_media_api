@@ -2,6 +2,9 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Profile, Follow
 
+
+# ============ User Serializer =============
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -28,6 +31,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['bio', 'profile_picture']
 
+
+# ============ Follow Serializer =============
 
 class FollowSerializer(serializers.ModelSerializer):
     follower = serializers.ReadOnlyField(source='follower.username')

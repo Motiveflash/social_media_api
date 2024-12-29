@@ -5,9 +5,15 @@ from .models import Profile, Follow
 from django.contrib.auth.models import User
 from .serializers import UserRegistrationSerializer, UserSerializer, ProfileSerializer, FollowSerializer
 
+
+# ============ Register User View =============
+
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
+
+
+# ============ User Profile View =============
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
@@ -17,6 +23,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user.profile
 
+
+# ============ Follow User Views =============
 
 class FollowUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -47,3 +55,58 @@ class UnfollowUserView(APIView):
             follow.delete()
             return Response({"detail": f"You have unfollowed {username}."}, status=200)
         return Response({"detail": "You are not following this user."}, status=400)
+    
+class UserFollowersCountView(APIView):
+    def get(self, request, username, *args, **kwargs):
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            return Response({"detail": "User not found."}, status=404)
+
+        followers_count = Follow.objects.filter(following=user).count()
+        return Response({
+            "username": username,
+            "followers_count": followers_count
+        })
+
+
+class UserFollowingCountView(APIView):
+    def get(self, request, username, *args, **kwargs):
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            return Response({"detail": "User not found."}, status=404)
+
+        following_count = Follow.objects.filter(follower=user).count()
+        return Response({
+            "username": username,
+            "following_count": following_count
+        })
+
+
+class UserFollowersListView(APIView):
+    def get(self, request, username, *args, **kwargs):
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            return Response({"detail": "User not found."}, status=404)
+
+        followers = Follow.objects.filter(following=user).select_related('follower')
+        followers_list = [{"username": follow.follower.username} for follow in followers]
+
+        return Response({
+            "username": username,
+            "followers": followers_list
+        })
+
+
+class UserFollowingListView(APIView):
+    def get(self, request, username, *args, **kwargs):
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            return Response({"detail": "User not found."}, status=404)
+
+        following = Follow.objects.filter(follower=user).select_related('following')
+        following_list = [{"username": follow.following.username} for follow in following]
+
+        return Response({
+            "username": username,
+            "following": following_list
+        })
