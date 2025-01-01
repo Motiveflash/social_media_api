@@ -9,9 +9,19 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     timestamp = models.DateTimeField(auto_now_add=True)
     media = models.ImageField(upload_to='post_media/', blank=True, null=True)
+    shared_post = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['author']),
+            models.Index(fields=['timestamp']),
+            models.Index(fields=['shared_post'])
+        ]
 
     def __str__(self):
-        return f"Post by {self.author.username} at {self.timestamp}"
+        if self.shared_post:
+            return f"Repost by {self.author.username} of {self.shared_post.author.username}'s post"
+        return f"Post by {self.author.username}"
     
 # ============ Like model =============
 
@@ -22,6 +32,11 @@ class Like(models.Model):
 
     class Meta:
         unique_together = ('user', 'post')
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['post']),
+            models.Index(fields=['timestamp']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} liked post {self.post.id}"
@@ -33,6 +48,13 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['post']),
+            models.Index(fields=['timestamp']),
+        ]
 
     def __str__(self):
         return f"Comment by {self.user.username} on post {self.post.id}"
@@ -49,6 +71,15 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['sender']),
+            models.Index(fields=['post']),
+            models.Index(fields=['is_read']),
+            models.Index(fields=['timestamp']),
+        ]
+
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
 
@@ -61,6 +92,14 @@ class DirectMessage(models.Model):
     content = models.TextField()
     is_read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['sender']),
+            models.Index(fields=['recipient']),
+            models.Index(fields=['is_read']),
+            models.Index(fields=['timestamp']),
+        ]
 
     def __str__(self):
         return f"Message from {self.sender.username} to {self.recipient.username}"

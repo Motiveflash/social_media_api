@@ -1,104 +1,327 @@
-# 🛠️ Social Media API
+# Social Media API Documentation
 
-A secure and scalable Social Media API built with Django and Django REST Framework, leveraging PostgreSQL for robust data storage. This API serves as the foundation for a modern social media platform, featuring essential user authentication and CRUD capabilities.
+This API provides endpoints to manage user authentication, social interactions, and messaging in a social media application. Built using Django and Django REST Framework, it ensures scalability and ease of integration.
 
-## ✨ Features
+## Table of Contents
+1. [Authentication](#authentication)
+2. [User Endpoints](#user-endpoints)
+3. [Post Endpoints](#post-endpoints)
+4. [Follow System Endpoints](#follow-system-endpoints)
+5. [Feed Endpoints](#feed-endpoints)
+6. [Messaging Endpoints](#messaging-endpoints)
+7. [Pagination and Sorting](#pagination-and-sorting)
+8. [Deployment](#deployment)
+9. [License](#license)
 
-- 🔐 Secure API built with Django REST Framework (DRF).
-- 🗄️ PostgreSQL for reliable and scalable data storage.
-- ⚙️ Environment Variables managed via `.env` for secure configuration.
-- 🧩 Modular and scalable structure for future feature integration.
-- 📝 Integrated Git for version control.
+---
 
-## 🚀 Getting Started
+## Authentication
 
-### 📋 Prerequisites
+Endpoints to handle user login, logout, and registration.
 
-Ensure you have the following installed on your system:
+### 1. Login
+- **Description**: Authenticates a user and returns a token.
+- **Endpoint**: `/api/auth/login/`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "username": "testuser",
+    "password": "securepassword"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "token": "abcdef1234567890"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Successful login.
+  - `400 Bad Request`: Invalid credentials.
 
-- 🐍 Python 3.10 or higher
-- 🐘 PostgreSQL 13 or higher
-- 🌀 Git
+### 2. Logout
+- **Description**: Logs out the authenticated user.
+- **Endpoint**: `/api/auth/logout/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Response**: `204 No Content`
 
-### 🛠️ Setup Instructions
+### 3. Register
+- **Description**: Registers a new user.
+- **Endpoint**: `/api/auth/register/`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "username": "newuser",
+    "email": "user@example.com",
+    "password": "securepassword"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "username": "newuser",
+    "email": "user@example.com"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: User registered successfully.
+  - `400 Bad Request`: Invalid input.
 
-1️⃣ **Clone the Repository**  
-```bash
-git clone https://github.com/yourusername/social_media_api.git
-cd social_media_api
-2️⃣ Create a Virtual Environment
+---
 
-bash
-Copy code
-python -m venv venv
-# Windows: venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
-3️⃣ Install Project Dependencies
+## User Endpoints
 
-bash
-Copy code
-pip install -r requirements.txt
-4️⃣ Configure Environment Variables
-Create a .env file in the project root and add:
+Endpoints for managing user profiles.
 
-plaintext
-Copy code
-DB_NAME=social_media_db
-DB_USER=your_username
-DB_PASSWORD=your_password
-DB_HOST=127.0.0.1
-DB_PORT=5432
-🔑 Replace your_username and your_password with your PostgreSQL credentials.
+### 1. Get User Profile
+- **Description**: Retrieves the profile of a specified user.
+- **Endpoint**: `/api/users/<username>/`
+- **Method**: `GET`
+- **Response**:
+  ```json
+  {
+    "username": "testuser",
+    "email": "test@example.com",
+    "bio": "Hello, I love coding!",
+    "profile_picture": null
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: User retrieved.
+  - `404 Not Found`: User does not exist.
 
-5️⃣ Apply Database Migrations
+### 2. Update User Profile
+- **Description**: Updates the profile of the authenticated user.
+- **Endpoint**: `/api/users/<username>/`
+- **Method**: `PUT`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "bio": "New bio",
+    "profile_picture": "https://example.com/profile.jpg"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "username": "testuser",
+    "email": "test@example.com",
+    "bio": "New bio",
+    "profile_picture": "https://example.com/profile.jpg"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Profile updated.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: User does not exist.
 
-bash
-Copy code
-python manage.py makemigrations
-python manage.py migrate
-6️⃣ Run the Development Server
+---
 
-bash
-Copy code
-python manage.py runserver
-🌐 Visit http://127.0.0.1:8000/ to view the app running locally.
+## Post Endpoints
 
-👨‍💻 Create a Superuser
-To access the admin dashboard, create a superuser:
+Endpoints for creating, retrieving, updating, and deleting posts.
 
-bash
-Copy code
-python manage.py createsuperuser
-🔎 Project Overview
-📂 Project Structure
-plaintext
-Copy code
-social_media_api/
-├── social_media_api/        # Project settings and configurations
-├── users/                   # Users app
-├── venv/                    # Virtual environment (not committed)
-├── .env                     # Environment variables (not committed)
-├── .gitignore               # Git ignore file
-├── requirements.txt         # Project dependencies
-└── manage.py                # Django management script
-📖 API Documentation
-Access detailed API documentation via Django REST Framework's browsable API:
+### 1. Create a Post
+- **Description**: Creates a new post for the authenticated user.
+- **Endpoint**: `/api/posts/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "content": "This is my first post!",
+    "media": "https://example.com/image.jpg"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "content": "This is my first post!",
+    "media": "https://example.com/image.jpg",
+    "timestamp": "2024-12-27T12:00:00Z",
+    "user": "testuser"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Post created.
+  - `400 Bad Request`: Invalid input.
 
-bash
-Copy code
-http://127.0.0.1:8000/api/
-🏗️ Contributing
-We welcome contributions!
+### 2. Get a Post
+- **Description**: Retrieves the details of a specific post.
+- **Endpoint**: `/api/posts/<id>/`
+- **Method**: `GET`
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "content": "This is my first post!",
+    "media": "https://example.com/image.jpg",
+    "timestamp": "2024-12-27T12:00:00Z",
+    "user": "testuser"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Post retrieved.
+  - `404 Not Found`: Post does not exist.
 
-🍴 Fork the repository.
-🛠️ Create a new branch: git checkout -b feature-name.
-💾 Commit your changes: git commit -m 'Add feature'.
-📤 Push the branch: git push origin feature-name.
-✅ Open a pull request.
-📜 License
-This project is licensed under the MIT License. For details, see the LICENSE file.
+### 3. Update a Post
+- **Description**: Updates an existing post created by the authenticated user.
+- **Endpoint**: `/api/posts/<id>/`
+- **Method**: `PUT`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "content": "Updated content!",
+    "media": "https://example.com/new-image.jpg"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "content": "Updated content!",
+    "media": "https://example.com/new-image.jpg",
+    "timestamp": "2024-12-27T12:00:00Z",
+    "user": "testuser"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Post updated.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post does not exist.
 
-❤️ Support
-If you found this helpful, give it a ⭐ on GitHub!
+### 4. Delete a Post
+- **Description**: Deletes a specific post created by the authenticated user.
+- **Endpoint**: `/api/posts/<id>/`
+- **Method**: `DELETE`
+- **Authentication**: Required
+- **Response**: `204 No Content`
+- **Status Codes**:
+  - `204 No Content`: Post deleted.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post does not exist.
 
-Feel free to open an issue or reach out with questions or suggestions.
+---
+
+## Follow System Endpoints
+
+Endpoints for managing follow relationships between users.
+
+### 1. Follow a User
+- **Description**: Follows a specific user.
+- **Endpoint**: `/api/users/<username>/follow/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  {
+    "message": "You are now following testuser."
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Followed user.
+  - `400 Bad Request`: Invalid request.
+
+### 2. Unfollow a User
+- **Description**: Unfollows a specific user.
+- **Endpoint**: `/api/users/<username>/unfollow/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  {
+    "message": "You have unfollowed testuser."
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Unfollowed user.
+
+---
+
+## Feed Endpoints
+
+Endpoints for retrieving posts from followed users.
+
+### 1. View Feed
+- **Description**: Retrieves the feed of posts from users the authenticated user follows.
+- **Endpoint**: `/api/posts/feed/`
+- **Method**: `GET`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "content": "This is my first post!",
+      "media": "https://example.com/image.jpg",
+      "timestamp": "2024-12-27T12:00:00Z",
+      "user": "testuser"
+    }
+  ]
+  ```
+- **Status Codes**:
+  - `200 OK`: Feed retrieved.
+
+---
+
+## Messaging Endpoints
+
+Endpoints for sending and managing direct messages.
+
+### 1. Send a Message
+- **Description**: Sends a direct message to a specified user.
+- **Endpoint**: `/api/posts/messages/send/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "recipient": "testuser",
+    "content": "Hello!"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "sender": "currentuser",
+    "recipient": "testuser",
+    "content": "Hello!",
+    "timestamp": "2024-12-27T12:00:00Z"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Message sent.
+
+---
+
+## Pagination and Sorting
+
+Details on how list endpoints can be paginated and sorted.
+
+- **Description**: Provides controls for data pagination and sorting.
+- **Query Parameters**:
+  - `?page=<page_number>`: Specify the page number.
+  - `?sort=<field>`: Sort by a specific field (e.g., `timestamp`).
+
+---
+
+## Deployment
+
+- **Description**: Deployment details for the API.
+- The API is deployed on Heroku and can be accessed at: [https://socialmedia-api.herokuapp.com](https://socialmedia-api.herokuapp.com)
+
+---
+
+## License
+
+- **Description**: Licensing details.
+- This project is licensed under the MIT License.
+
