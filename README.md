@@ -21,7 +21,7 @@ Endpoints to handle user login, logout, and registration.
 
 ### 1. Login
 - **Description**: Authenticates a user and returns a token.
-- **Endpoint**: `/api/auth/login/`
+- **Endpoint**: `/api/users/login/`
 - **Method**: `POST`
 - **Request Body**:
   ```json
@@ -42,14 +42,14 @@ Endpoints to handle user login, logout, and registration.
 
 ### 2. Logout
 - **Description**: Logs out the authenticated user.
-- **Endpoint**: `/api/auth/logout/`
+- **Endpoint**: `/api/users/logout/`
 - **Method**: `POST`
 - **Authentication**: Required
 - **Response**: `204 No Content`
 
 ### 3. Register
 - **Description**: Registers a new user.
-- **Endpoint**: `/api/auth/register/`
+- **Endpoint**: `/api/users/register/`
 - **Method**: `POST`
 - **Request Body**:
   ```json
@@ -79,7 +79,7 @@ Endpoints for managing user profiles.
 
 ### 1. Get User Profile
 - **Description**: Retrieves the profile of a specified user.
-- **Endpoint**: `/api/users/<username>/`
+- **Endpoint**: `/api/users/profile/`
 - **Method**: `GET`
 - **Response**:
   ```json
@@ -96,7 +96,7 @@ Endpoints for managing user profiles.
 
 ### 2. Update User Profile
 - **Description**: Updates the profile of the authenticated user.
-- **Endpoint**: `/api/users/<username>/`
+- **Endpoint**: `/api/users/profile/`
 - **Method**: `PUT`
 - **Authentication**: Required
 - **Request Body**:

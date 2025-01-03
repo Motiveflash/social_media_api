@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Profile, Follow
 from django.contrib.auth.models import User
-from .serializers import UserRegistrationSerializer, UserSerializer, ProfileSerializer, FollowSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserRegistrationSerializer, ProfileSerializer
 
 
 # ============ Register User View =============
@@ -12,6 +14,44 @@ class RegisterUserView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
 
+
+# ============ Login and Token Views =============
+
+class LoginView(TokenObtainPairView):
+    # This will use the default JWT view which returns access and refresh tokens
+    pass
+
+
+class AutoRefreshView(TokenRefreshView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Ensure the request has a valid refresh token
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({"detail": "Refresh token is required."}, status=400)
+
+        try:
+            # Create a RefreshToken object from the refresh token
+            refresh = RefreshToken(refresh_token)
+            
+            # Generate a new access token
+            access_token = str(refresh.access_token)
+            
+            # Return the new access token (optional: include other info)
+            return Response({'access': access_token})
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=400)
+
+# ============ Logout View =============
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Clients should delete the JWT token from their storage
+        return Response({"detail": "Successfully logged out."}, status=200)
 
 # ============ User Profile View =============
 

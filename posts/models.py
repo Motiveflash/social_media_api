@@ -11,6 +11,12 @@ class Post(models.Model):
     media = models.ImageField(upload_to='post_media/', blank=True, null=True)
     shared_post = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
+    def like_count(self):
+        return self.likes.count()
+    
+    def comment_counts(self):
+        return self.comments.count()
+
     class Meta:
         indexes = [
             models.Index(fields=['author']),

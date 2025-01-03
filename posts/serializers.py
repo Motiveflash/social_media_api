@@ -8,11 +8,10 @@ from .models import Post, Like, Comment, Notification, DirectMessage
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username') # Display the username of the author
 
-
     class Meta:
         model = Post
-        fields = ['id', 'content', 'author', 'timestamp', 'media']
-        read_only_fields = ['id', 'author', 'timestamp']
+        fields = ['id', 'author', 'content', 'media', 'like_count', 'comment_counts', 'timestamp' ]
+        read_only_fields = ['id', 'author','like_count', 'comment_counts', 'timestamp']
 
 
 # ============ Like Serializer =============

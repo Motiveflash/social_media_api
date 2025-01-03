@@ -25,11 +25,43 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         Profile.objects.create(user=user)  # Automatically create a profile
         return user
+    
+
+    # ============ Profile Serializer =============
 
 class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    email = serializers.EmailField(source='user.email')
+    
+    # Fields related to the Profile model
+    bio = serializers.CharField()
+    profile_picture = serializers.ImageField()
+    
+    # Follower and following counts
+    follower_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    
+    # Lists of followers and following users (just usernames)
+    followers = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
-        fields = ['bio', 'profile_picture']
+        fields = ['username', 'email', 'bio', 'profile_picture', 'follower_count', 'following_count', 'followers', 'following']
+
+    def get_follower_count(self, obj):
+        return Follow.objects.filter(following=obj.user).count()
+
+    def get_following_count(self, obj):
+        return Follow.objects.filter(follower=obj.user).count()
+
+    def get_followers(self, obj):
+        followers = Follow.objects.filter(following=obj.user)
+        return [follower.follower.username for follower in followers]
+
+    def get_following(self, obj):
+        following = Follow.objects.filter(follower=obj.user)
+        return [followed.following.username for followed in following]
 
 
 # ============ Follow Serializer =============

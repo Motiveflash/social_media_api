@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import APIException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Post, Like, Comment, Notification, DirectMessage
@@ -7,8 +8,17 @@ from django.contrib.auth.models import User
 from .serializers import PostSerializer, LikeSerializer, CommentSerializer, NotificationSerializer, DirectMessageSerializer
 from rest_framework.pagination import PageNumberPagination
 from .utils import create_notification
+from django.utils import timezone
+from datetime import timedelta
 
 
+
+# ============ Custom Exception Handler =============
+
+class PermissionError(APIException):
+    status_code = 403
+    default_detail = "You do not have permission to perform this action."
+    default_code = 'permission_denied'
 
 # ============ Post CRUD Views =============
 
@@ -28,13 +38,13 @@ class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         # Ensure only the author can update their post
         if self.request.user != serializer.instance.author:
-            raise PermissionError("You can only update your own posts.")
+            raise PermissionError()
         serializer.save()
 
     def perform_destroy(self, instance):
         # Ensure only the author can delete their post
         if self.request.user != instance.author:
-            raise PermissionError("You can only delete your own posts.")
+            raise PermissionError()
         instance.delete()
 
 
@@ -131,6 +141,15 @@ class CommentPostView(APIView):
             message=f"{request.user.username} commented on your post: {content}"
         )
         return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+    
+
+class PostCommentsView(generics.ListAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        post_id = self.kwargs.get('post_id')
+        return Comment.objects.filter(post_id=post_id)
         
 
 # ============ Notification Views =============
@@ -167,17 +186,28 @@ class SendMessageView(APIView):
 
         if not recipient_username or not content:
             return Response({"detail": "Recipient and content are required."}, status=status.HTTP_400_BAD_REQUEST)
-        recipient = User.objects.filter(username=recipient_username).first()
 
+        # Check for rate limiting: no more than 5 messages in 30 minutes
+        recent_messages = DirectMessage.objects.filter(sender=request.user, timestamp__gte=timezone.now() - timedelta(minutes=30))
+        if recent_messages.count() >= 5:
+            return Response({"detail": "You have reached your message limit. Please try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        recipient = User.objects.filter(username=recipient_username).first()
         if not recipient:
             return Response({"detail": "Recipient not found."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if recipient == request.user:
-            return Response({"detail": "You can not send message to yourself."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        message = DirectMessage.objects.create(sender=request.user, recipient=recipient_username, content=content)
+            return Response({"detail": "You cannot send messages to yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+        message = DirectMessage.objects.create(sender=request.user, recipient=recipient, content=content)
         serializer = DirectMessageSerializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        messages = DirectMessage.objects.filter(sender=request.user).order_by('-timestamp')
+        serializer = DirectMessageSerializer(messages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 class InboxView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -187,6 +217,7 @@ class InboxView(APIView):
         serializer = DirectMessageSerializer(messages, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
 class SentMessagesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
