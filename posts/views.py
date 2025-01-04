@@ -20,12 +20,23 @@ class PermissionError(APIException):
     default_detail = "You do not have permission to perform this action."
     default_code = 'permission_denied'
 
+# ============ Custom Pagnation =============
+
+class CustomPagination(PageNumberPagination):
+    page_size = 4  # Number of posts per page
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+
 # ============ Post CRUD Views =============
 
 class PostListCreateView(generics.ListCreateAPIView):
     queryset = Post.objects.all().order_by('-timestamp')  # Display posts in reverse chronological order
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination
+
+    paginator = CustomPagination()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)  # Automatically set the author to the logged-in user
@@ -51,11 +62,6 @@ class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # ============ Feed and Pagination =============
-
-class CustomPagination(PageNumberPagination):
-    page_size = 10  # Number of posts per page
-    page_size_query_param = 'page_size'
-    max_page_size = 50
 
 class FeedView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -123,6 +129,7 @@ class UnlikePostView(APIView):
 class CommentPostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    # Create a comment
     def post(self, request, post_id, *args, **kwargs):
         post = Post.objects.filter(id=post_id).first()
         if post is None:
@@ -141,11 +148,82 @@ class CommentPostView(APIView):
             message=f"{request.user.username} commented on your post: {content}"
         )
         return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+
+    # Edit a comment
+    def put(self, request, post_id, comment_id, *args, **kwargs):
+        post = Post.objects.filter(id=post_id).first()
+        if post is None:
+            return Response({"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        comment = Comment.objects.filter(id=comment_id, post=post).first()
+        if comment is None:
+            return Response({"detail": "Comment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if comment.user != request.user:
+            return Response({"detail": "You do not have permission to edit this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+        content = request.data.get("content", "").strip()
+        if not content:
+            return Response({"detail": "Content is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        comment.content = content
+        comment.save()
+
+        return Response(CommentSerializer(comment).data, status=status.HTTP_200_OK)
+
+    # Delete a comment
+    def delete(self, request, post_id, comment_id, *args, **kwargs):
+        post = Post.objects.filter(id=post_id).first()
+        if post is None:
+            return Response({"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        comment = Comment.objects.filter(id=comment_id, post=post).first()
+        if comment is None:
+            return Response({"detail": "Comment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if comment.user != request.user:
+            return Response({"detail": "You do not have permission to delete this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+        comment.delete()
+        return Response({"detail": "Comment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+    # Edit a comment
+    def put(self, request, post_id, comment_id, *args, **kwargs):
+        comment = Comment.objects.filter(id=comment_id, post__id=post_id).first()
+        if comment is None:
+            return Response({"detail": "Comment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ensure the user is the owner of the comment
+        if comment.user != request.user:
+            return Response({"detail": "You do not have permission to edit this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+        content = request.data.get("content", "")
+        if not content:
+            return Response({"detail": "Content is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the comment
+        comment.content = content
+        comment.save()
+
+        return Response(CommentSerializer(comment).data, status=status.HTTP_200_OK)
+
+    # Delete a comment
+    def delete(self, request, post_id, comment_id, *args, **kwargs):
+        comment = Comment.objects.filter(id=comment_id, post__id=post_id).first()
+        if comment is None:
+            return Response({"detail": "Comment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ensure the user is the owner of the comment
+        if comment.user != request.user:
+            return Response({"detail": "You do not have permission to delete this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Delete the comment
+        comment.delete()
+        return Response({"detail": "Comment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
     
 
 class PostCommentsView(generics.ListAPIView):
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         post_id = self.kwargs.get('post_id')

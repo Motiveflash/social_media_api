@@ -8,8 +8,9 @@ urlpatterns = [
 
     path('like/<int:post_id>/', LikePostView.as_view(), name='like-post'),
     path('unlike/<int:post_id>/', UnlikePostView.as_view(), name='unlike-post'),
-    path('comment/<int:post_id>/', CommentPostView.as_view(), name='comment-post'),
-    path('<int:post_id>/comments/', PostCommentsView.as_view(), name='post-comments'),
+    path('<int:post_id>/comment/', CommentPostView.as_view(), name='create_comment'),
+    path('<int:post_id>/comments/<int:comment_id>/', CommentPostView.as_view(), name='edit_delete_comment'),
+    path('<int:post_id>/comments/', PostCommentsView.as_view(), name='comments'),
 
     path('notifications/', NotificationListView.as_view(), name='notification-list'),
     path('notifications/<int:notification_id>/read/', MarkNotificationAsReadView.as_view(), name='mark-notification-read'),

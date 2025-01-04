@@ -19,35 +19,7 @@ This API provides endpoints to manage user authentication, social interactions, 
 
 Endpoints to handle user login, logout, and registration.
 
-### 1. Login
-- **Description**: Authenticates a user and returns a token.
-- **Endpoint**: `/api/users/login/`
-- **Method**: `POST`
-- **Request Body**:
-  ```json
-  {
-    "username": "testuser",
-    "password": "securepassword"
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "token": "abcdef1234567890"
-  }
-  ```
-- **Status Codes**:
-  - `200 OK`: Successful login.
-  - `400 Bad Request`: Invalid credentials.
-
-### 2. Logout
-- **Description**: Logs out the authenticated user.
-- **Endpoint**: `/api/users/logout/`
-- **Method**: `POST`
-- **Authentication**: Required
-- **Response**: `204 No Content`
-
-### 3. Register
+### 1. Register
 - **Description**: Registers a new user.
 - **Endpoint**: `/api/users/register/`
 - **Method**: `POST`
@@ -71,6 +43,35 @@ Endpoints to handle user login, logout, and registration.
   - `201 Created`: User registered successfully.
   - `400 Bad Request`: Invalid input.
 
+
+### 2. Login
+- **Description**: Authenticates a user and returns the access token.
+- **Endpoint**: `/api/users/login/`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "username": "testuser",
+    "password": "securepassword"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "access": "abcdef1234567890"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Successful login.
+  - `400 Bad Request`: Invalid credentials.
+
+### 3. Logout
+- **Description**: Logs out the authenticated user.
+- **Endpoint**: `/api/users/logout/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Response**: `204 No Content`
+
 ---
 
 ## User Endpoints
@@ -78,7 +79,7 @@ Endpoints to handle user login, logout, and registration.
 Endpoints for managing user profiles.
 
 ### 1. Get User Profile
-- **Description**: Retrieves the profile of a specified user.
+- **Description**: Retrieves the profile of a current user.
 - **Endpoint**: `/api/users/profile/`
 - **Method**: `GET`
 - **Response**:
@@ -87,7 +88,11 @@ Endpoints for managing user profiles.
     "username": "testuser",
     "email": "test@example.com",
     "bio": "Hello, I love coding!",
-    "profile_picture": null
+    "profile_picture": null,
+    "follower_count": 0,
+    "following_count": 0,
+    "followers": [],
+    "following": []
   }
   ```
 - **Status Codes**:
@@ -102,17 +107,21 @@ Endpoints for managing user profiles.
 - **Request Body**:
   ```json
   {
-    "bio": "New bio",
-    "profile_picture": "https://example.com/profile.jpg"
+    "username": "new_username",
+    "bio": "Updated bio text"
   }
   ```
 - **Response**:
   ```json
   {
-    "username": "testuser",
+    "username": "new_username",
     "email": "test@example.com",
-    "bio": "New bio",
-    "profile_picture": "https://example.com/profile.jpg"
+    "bio": "Updated bio text",
+    "profile_picture": null,
+    "follower_count": 0,
+    "following_count": 0,
+    "followers": [],
+    "following": []
   }
   ```
 - **Status Codes**:
@@ -125,6 +134,7 @@ Endpoints for managing user profiles.
 ## Post Endpoints
 
 Endpoints for creating, retrieving, updating, and deleting posts.
+Like and comment on a post
 
 ### 1. Create a Post
 - **Description**: Creates a new post for the authenticated user.
@@ -135,17 +145,19 @@ Endpoints for creating, retrieving, updating, and deleting posts.
   ```json
   {
     "content": "This is my first post!",
-    "media": "https://example.com/image.jpg"
+    "media": "Optional media link"
   }
   ```
 - **Response**:
   ```json
   {
     "id": 1,
+    "author": "new_username",
     "content": "This is my first post!",
-    "media": "https://example.com/image.jpg",
+    "media": "null",
+    "like_count": 0,
+    "comment_counts": 0,
     "timestamp": "2024-12-27T12:00:00Z",
-    "user": "testuser"
   }
   ```
 - **Status Codes**:
@@ -154,16 +166,18 @@ Endpoints for creating, retrieving, updating, and deleting posts.
 
 ### 2. Get a Post
 - **Description**: Retrieves the details of a specific post.
-- **Endpoint**: `/api/posts/<id>/`
+- **Endpoint**: `/api/posts/<int:pk>/`
 - **Method**: `GET`
 - **Response**:
   ```json
   {
     "id": 1,
-    "content": "This is my first post!",
-    "media": "https://example.com/image.jpg",
-    "timestamp": "2024-12-27T12:00:00Z",
-    "user": "testuser"
+    "author": "new_username",
+    "content": "This is my first post",
+    "media": null,
+    "like_count": 1,
+    "comment_counts": 0,
+    "timestamp": "2025-01-03T12:05:49.461887Z"
   }
   ```
 - **Status Codes**:
@@ -186,10 +200,12 @@ Endpoints for creating, retrieving, updating, and deleting posts.
   ```json
   {
     "id": 1,
-    "content": "Updated content!",
+    "author": "motive",
+    "content": "updated content",
     "media": "https://example.com/new-image.jpg",
-    "timestamp": "2024-12-27T12:00:00Z",
-    "user": "testuser"
+    "like_count": 1,
+    "comment_counts": 0,
+    "timestamp": "2025-01-03T12:05:49.461887Z"
   }
   ```
 - **Status Codes**:
@@ -208,6 +224,133 @@ Endpoints for creating, retrieving, updating, and deleting posts.
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post does not exist.
 
+### 5. Like a Post
+- **Description**: like a specific post.
+- **Endpoint**: `/api/posts/like/<int:post_id>/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  {
+    "user": "current user",
+    "post": "post_id",
+    "timestamp": "2025-01-04T14:17:02.310651Z"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Post liked.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post does not exist.
+
+### 6. Unlike a Post
+- **Description**: Unlike a specific post.
+- **Endpoint**: `/api/posts/unlike/<int:post_id>/`
+- **Method**: `DELETE`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  {
+    "detail": "You have unliked this post."
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Post liked.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post does not exist.
+
+### 7. Create Comment
+- **Description**: Comment on a specific post.
+- **Endpoint**: `/api/posts/<int:post_id>/comment/`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "content": "This is a comment"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "user": "current user",
+    "post": "post_id",
+    "content": "This is a comment",
+    "timestamp": "2025-01-04T14:51:38.038789Z"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Comment Post.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post does not exist.
+
+### 8. Edit Comment
+- **Description**: Edit a Comment.
+- **Endpoint**: `/api/posts/<int:post_id>/comments/<int:comment_id>/`
+- **Method**: `PUT`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "content": "Edit the comment"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "user": "current user",
+    "post": "post_id",
+    "content": "This is the edited comment",
+    "timestamp": "2025-01-04T14:51:38.038789Z"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Edit Comment Post.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post or comment does not exist.
+
+### 8. Delete Comment
+- **Description**: Delete a Comment.
+- **Endpoint**: `/api/posts/<int:post_id>/comments/<int:comment_id>/`
+- **Method**: `DELETE`
+- **Authentication**: Required
+- **Request Body**:
+  ```
+  
+  ```
+- **Response**:
+  ```json
+  {
+    "user": "current user",
+    "post": "post_id",
+    "content": "This is the edited comment",
+    "timestamp": "2025-01-04T14:51:38.038789Z"
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Edit Comment Post.
+  - `403 Forbidden`: Unauthorized access.
+  - `404 Not Found`: Post or comment does not exist.
+
+### 10. View Post Comments
+- **Description**: Comment on a specific post.
+- **Endpoint**: `/api/posts/<int:post_id>/comments/`
+- **Method**: `GET`
+- **Authentication**: Not Required
+- **Response**:
+  ```json
+  [
+    {
+      "user": "commenter",
+      "post": "post_id",
+      "content": "This is a comment",
+      "timestamp": "2025-01-04T14:51:38.038789Z"
+    }
+  ]
+  ```
+- **Status Codes**:
+  - `200 OK`: Comment list.
+  - `404 Not Found`: Post does not exist.
+
 ---
 
 ## Follow System Endpoints
@@ -216,7 +359,7 @@ Endpoints for managing follow relationships between users.
 
 ### 1. Follow a User
 - **Description**: Follows a specific user.
-- **Endpoint**: `/api/users/<username>/follow/`
+- **Endpoint**: `/api/users/follow/<str:username>/`
 - **Method**: `POST`
 - **Authentication**: Required
 - **Response**:
@@ -226,13 +369,13 @@ Endpoints for managing follow relationships between users.
   }
   ```
 - **Status Codes**:
-  - `200 OK`: Followed user.
+  - `201 Created`: Followed user.
   - `400 Bad Request`: Invalid request.
 
 ### 2. Unfollow a User
 - **Description**: Unfollows a specific user.
-- **Endpoint**: `/api/users/<username>/unfollow/`
-- **Method**: `POST`
+- **Endpoint**: `/api/users/unfollow/<str:username>/`
+- **Method**: `DELETE`
 - **Authentication**: Required
 - **Response**:
   ```json
@@ -243,6 +386,70 @@ Endpoints for managing follow relationships between users.
 - **Status Codes**:
   - `200 OK`: Unfollowed user.
 
+### 3. follow-count 
+- **Description**: Get the follow-count of a specific user.
+- **Endpoint**: `api/users/<str:username>/followers-count/`
+- **Method**: `GET`
+- **Authentication**: Not Required
+- **Response**:
+  ```json
+  {
+    "username": "random user",
+    "followers_count": 1
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Number of followers.
+  - `404 Not Found`: User dose not exist
+
+### 4. following-count 
+- **Description**: Get the following-count of a specific user.
+- **Endpoint**: `api/users/<str:username>/followers-count/`
+- **Method**: `GET`
+- **Authentication**: Not Required
+- **Response**:
+  ```json
+  {
+    "username": "random user",
+    "following_count": 4
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Number of following.
+  - `404 Not Found`: User dose not exist
+
+### 5. following-count 
+- **Description**: Get the following list of a specific user.
+- **Endpoint**: `api/users/<str:username>/followers-list/`
+- **Method**: `GET`
+- **Authentication**: Not Required
+- **Response**:
+  ```json
+  {
+    "username": "random user",
+    "following": []
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: List of followers.
+  - `404 Not Found`: User dose not exist
+---
+
+### 5. following-count 
+- **Description**: Get the following list of a specific user.
+- **Endpoint**: `api/users/<str:username>/following-list/`
+- **Method**: `GET`
+- **Authentication**: Not Required
+- **Response**:
+  ```json
+  {
+    "username": "random user",
+    "following": ["user1", "user2", "user3", "user4"]
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: List of following.
+  - `404 Not Found`: User dose not exist
 ---
 
 ## Feed Endpoints
@@ -259,10 +466,12 @@ Endpoints for retrieving posts from followed users.
   [
     {
       "id": 1,
-      "content": "This is my first post!",
-      "media": "https://example.com/image.jpg",
-      "timestamp": "2024-12-27T12:00:00Z",
-      "user": "testuser"
+      "author": "followed user",
+      "content": "This is my first post",
+      "media": null,
+      "like_count": 1,
+      "comment_counts": 0,
+      "timestamp": "2025-01-03T12:05:49.461887Z"
     }
   ]
   ```

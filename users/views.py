@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Profile, Follow
@@ -62,6 +62,27 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user.profile
+
+    def update(self, request, *args, **kwargs):
+        profile = self.get_object()
+
+        data = request.data
+
+        # Fields we want to allow updating
+        update_fields = ['username', 'email', 'bio', 'profile_picture']
+
+        # If no fields are provided, return a bad request
+        if not any(field in data for field in update_fields):
+            return Response({"detail": "No fields to update."}, status=status.HTTP_400_BAD_REQUEST)
+
+        for field in update_fields:
+            if field in data:
+                setattr(profile, field, data[field])
+
+        profile.save()
+
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
 
 
 # ============ Follow User Views =============
