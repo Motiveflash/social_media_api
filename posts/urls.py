@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PostListCreateView, PostRetrieveUpdateDestroyView, FeedView, LikePostView, UnlikePostView, CommentPostView, PostCommentsView, NotificationListView, MarkNotificationAsReadView, SendMessageView, InboxView, SentMessagesView, MarkMessageAsReadView
+from .views import PostListCreateView, PostRetrieveUpdateDestroyView, FeedView, LikePostView, UnlikePostView, CommentPostView, PostCommentsView, NotificationListView, MarkNotificationAsReadView, SendMessageView, InboxView, SentMessagesView,MessageDetailView, DeleteMessageView
 
 urlpatterns = [
     path('', PostListCreateView.as_view(), name='post-list-create'),
@@ -12,11 +12,11 @@ urlpatterns = [
     path('<int:post_id>/comments/<int:comment_id>/', CommentPostView.as_view(), name='edit_delete_comment'),
     path('<int:post_id>/comments/', PostCommentsView.as_view(), name='comments'),
 
-    path('notifications/', NotificationListView.as_view(), name='notification-list'),
-    path('notifications/<int:notification_id>/read/', MarkNotificationAsReadView.as_view(), name='mark-notification-read'),
-
     path('messages/send/', SendMessageView.as_view(), name='send-message'),
-    path('messages/inbox/', InboxView.as_view(), name='inbox'),
     path('messages/sent/', SentMessagesView.as_view(), name='sent-messages'),
-    path('messages/<int:message_id>/read/', MarkMessageAsReadView.as_view(), name='mark-message-read'),
+    path('messages/inbox/', InboxView.as_view(), name='inbox'),
+    path('messages/<int:message_id>/detail/', MessageDetailView.as_view(), name='message_detail'),
+    path('messages/<int:message_id>/delete/', DeleteMessageView.as_view(), name='message_detail'),
+
+    path('notifications/', NotificationListView.as_view(), name='notification-list'),
 ]

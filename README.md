@@ -304,30 +304,17 @@ Like and comment on a post
   }
   ```
 - **Status Codes**:
-  - `201 Created`: Edit Comment Post.
+  - `200 OK`: Edit Comment Post.
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post or comment does not exist.
 
-### 8. Delete Comment
+### 9. Delete Comment
 - **Description**: Delete a Comment.
 - **Endpoint**: `/api/posts/<int:post_id>/comments/<int:comment_id>/`
 - **Method**: `DELETE`
 - **Authentication**: Required
-- **Request Body**:
-  ```
-  
-  ```
-- **Response**:
-  ```json
-  {
-    "user": "current user",
-    "post": "post_id",
-    "content": "This is the edited comment",
-    "timestamp": "2025-01-04T14:51:38.038789Z"
-  }
-  ```
 - **Status Codes**:
-  - `201 Created`: Edit Comment Post.
+  - `204 No Content`: Edit Comment Post.
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post or comment does not exist.
 
@@ -386,7 +373,7 @@ Endpoints for managing follow relationships between users.
 - **Status Codes**:
   - `200 OK`: Unfollowed user.
 
-### 3. follow-count 
+### 3. Number of followers 
 - **Description**: Get the follow-count of a specific user.
 - **Endpoint**: `api/users/<str:username>/followers-count/`
 - **Method**: `GET`
@@ -402,7 +389,7 @@ Endpoints for managing follow relationships between users.
   - `200 OK`: Number of followers.
   - `404 Not Found`: User dose not exist
 
-### 4. following-count 
+### 4. Number of following 
 - **Description**: Get the following-count of a specific user.
 - **Endpoint**: `api/users/<str:username>/followers-count/`
 - **Method**: `GET`
@@ -418,8 +405,8 @@ Endpoints for managing follow relationships between users.
   - `200 OK`: Number of following.
   - `404 Not Found`: User dose not exist
 
-### 5. following-count 
-- **Description**: Get the following list of a specific user.
+### 5. Followers list 
+- **Description**: Get the followers list of a specific user.
 - **Endpoint**: `api/users/<str:username>/followers-list/`
 - **Method**: `GET`
 - **Authentication**: Not Required
@@ -435,7 +422,7 @@ Endpoints for managing follow relationships between users.
   - `404 Not Found`: User dose not exist
 ---
 
-### 5. following-count 
+### 5. Following list
 - **Description**: Get the following list of a specific user.
 - **Endpoint**: `api/users/<str:username>/following-list/`
 - **Method**: `GET`
@@ -500,25 +487,178 @@ Endpoints for sending and managing direct messages.
   ```json
   {
     "id": 1,
-    "sender": "currentuser",
     "recipient": "testuser",
     "content": "Hello!",
+    "is_read": "false",
     "timestamp": "2024-12-27T12:00:00Z"
   }
   ```
 - **Status Codes**:
   - `201 Created`: Message sent.
 
+### 2. Inbox
+- **Description**: Get all recieved messages of the authenticated user.
+- **Endpoint**: `/api/posts/messages/inbox/`
+- **Method**: `GET`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "sender": "testuser",
+      "is_read": "false",
+      "timestamp": "2024-12-27T12:00:00Z"
+    }
+  ]
+
+### 3. Messages Detail 
+- **Description**: View the detail of a message
+- **Endpoint**: `/api/posts/messages/<int:message_id>/detail/`
+- **Method**: `GET`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "sender": "testuser",
+    "content": "Hello!",
+    "is_read": "true",
+    "timestamp": "2024-12-27T12:00:00Z"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Inbox.
+
+### 3. Sent Messages 
+- **Description**: Get all sent messages of the authenticated user.
+- **Endpoint**: `/api/posts/messages/sent/`
+- **Method**: `GET`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "recipient": "testuser",
+      "content": "Hello!",
+      "is_read": "false",
+      "timestamp": "2024-12-27T12:00:00Z"
+    }
+  ]
+  ```
+- **Status Codes**:
+  - `200 OK`: Inbox.
+
+### 3. Delete a Messages 
+- **Description**: Get all sent messages of the authenticated user.
+- **Endpoint**: `/api/posts/messages/sent/`
+- **Method**: `DELETE`
+- **Authentication**: Required
+- **Status Codes**:
+  - `204 No Content`: Deleted Message.
+
 ---
 
-## Pagination and Sorting
+## Messaging Endpoints
 
-Details on how list endpoints can be paginated and sorted.
+Endpoints for notifications.
 
-- **Description**: Provides controls for data pagination and sorting.
-- **Query Parameters**:
-  - `?page=<page_number>`: Specify the page number.
-  - `?sort=<field>`: Sort by a specific field (e.g., `timestamp`).
+### 1. Get All Notification
+- **Description**: Get all notifications of the authenticated user.
+- **Endpoint**: `/api/posts/notifications/`
+- **Method**: `GIT`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "recipient": "testuser",
+    "content": "Hello!"
+  }
+  ```
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "sender": "testuser",
+      "post": "nul",
+      "notification_type": "direct_message",
+      "message": "You have a new message from testuser: Hey this is a message!",
+      "is_read": false,
+      "timestamp": "2025-01-05T16:45:22.712261Z"
+    }
+  ]
+  ```
+- **Status Codes**:
+  - `200 OK`: Notifications.
+
+---
+
+### Optional Query Parameters for GET /api/posts/
+
+The `GET /api/posts/` endpoint supports the following optional query parameters for filtering, searching, and ordering posts:
+
+---
+
+#### 1. `author` (optional)
+Filters posts by the author's username.
+
+- **Example:** `author=alice`
+  - Returns posts authored by the user with the username `alice`.
+
+---
+
+#### 2. `title` (optional)
+Filters posts where the title contains the specified string (case-insensitive).
+
+- **Example:** `title=python`
+  - Returns posts where the title contains the word `python`.
+
+---
+
+#### 3. `category` (optional)
+Filters posts by category (partial match).
+
+- **Example:** `category=tech`
+  - Returns posts in the `tech` category or any post that contains `tech` in the category name.
+
+---
+
+#### 4. `published_after` (optional)
+Filters posts published within the last `N` days. This parameter must be an integer representing the number of days ago.
+
+- **Example:** `published_after=7`
+  - Returns posts that were published in the last 7 days.
+
+---
+
+#### 5. `published_before` (optional)
+Filters posts published before `N` days ago. This parameter must be an integer representing the number of days ago.
+
+- **Example:** `published_before=30`
+  - Returns posts that were published more than 30 days ago.
+
+---
+
+#### 6. `search` (optional)
+Performs a full-text search on both the title and content fields for a specified string (case-insensitive).
+
+- **Example:** `search=python`
+  - Returns posts where either the title or content contains the word `python`.
+
+---
+
+#### 7. `ordering` (optional)
+Defines the field(s) by which the posts should be ordered. Prefix the field name with `-` to indicate descending order.
+
+- **Example:** `ordering=-timestamp`
+  - Orders posts by the `timestamp` field in descending order.
+- **Additional Example:** `ordering=-author__username`
+  - Orders posts by the author's username in descending order.
+
+---
+
 
 ---
 

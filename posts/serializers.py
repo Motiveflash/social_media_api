@@ -36,23 +36,40 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['user', 'post', 'content', 'timestamp']
 
 
-# ============ Notification Serializer =============
-
-class NotificationSerializer(serializers.ModelSerializer):
-    sender = serializers.ReadOnlyField(source='sender.username')
-    user = serializers.ReadOnlyField(source='user.username')
-
-    class Meta:
-        model = Notification
-        fields = ['id', 'user', 'sender', 'post', 'notification_type', 'message', 'is_read', 'timestamp']
-
 
 # ============ Direct Message Serializer =============
 
+# Serializer for full message details (with sender and recipient)
 class DirectMessageSerializer(serializers.ModelSerializer):
     sender = serializers.ReadOnlyField(source='sender.username')
     recipient = serializers.ReadOnlyField(source='recipient.username')
 
     class Meta:
         model = DirectMessage
-        fields = ['id', 'sender', 'recipient', 'content', 'is_read', 'timestamp']
+        fields = ['id', 'sender', 'content', 'is_read', 'timestamp']
+
+# Serializer for inbox (excluding recipient)
+class InboxMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.StringRelatedField()
+
+    class Meta:
+        model = DirectMessage
+        fields = ['id', 'sender', 'is_read', 'timestamp']
+
+# Serializer for sent messages (including recipient)
+class SentMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.ReadOnlyField(source='sender.username')
+    recipient = serializers.ReadOnlyField(source='recipient.username')
+
+    class Meta:
+        model = DirectMessage
+        fields = ['id', 'recipient', 'is_read', 'timestamp']
+
+# ============ Notification Serializer =============
+
+class NotificationSerializer(serializers.ModelSerializer):
+    sender = serializers.ReadOnlyField(source='sender.username')
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'sender', 'post', 'notification_type', 'message', 'is_read', 'timestamp']
