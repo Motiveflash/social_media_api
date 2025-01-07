@@ -2,17 +2,6 @@
 
 This API provides endpoints to manage user authentication, social interactions, and messaging in a social media application. Built using Django and Django REST Framework, it ensures scalability and ease of integration.
 
-## Table of Contents
-1. [Authentication](#authentication)
-2. [User Endpoints](#user-endpoints)
-3. [Post Endpoints](#post-endpoints)
-4. [Follow System Endpoints](#follow-system-endpoints)
-5. [Feed Endpoints](#feed-endpoints)
-6. [Messaging Endpoints](#messaging-endpoints)
-7. [Pagination and Sorting](#pagination-and-sorting)
-8. [Deployment](#deployment)
-9. [License](#license)
-
 ---
 
 ## Authentication
@@ -560,7 +549,7 @@ Endpoints for sending and managing direct messages.
 
 ---
 
-## Messaging Endpoints
+## Notifications Endpoints
 
 Endpoints for notifications.
 

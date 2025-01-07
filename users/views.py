@@ -3,23 +3,34 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Profile, Follow
 from django.contrib.auth.models import User
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, ProfileSerializer
+from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileSerializer
 
 
 # ============ Register User View =============
 
 class RegisterUserView(generics.CreateAPIView):
-    serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # ============ Login and Token Views =============
 
-class LoginView(TokenObtainPairView):
-    # This will use the default JWT view which returns access and refresh tokens
-    pass
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AutoRefreshView(TokenRefreshView):
