@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PostListCreateView, PostRetrieveUpdateDestroyView, FeedView, LikePostView, UnlikePostView, CommentPostView, PostCommentsView, NotificationListView, MarkNotificationAsReadView, SendMessageView, InboxView, SentMessagesView,MessageDetailView, DeleteMessageView
+from .views import PostListCreateView, PostRetrieveUpdateDestroyView, FeedView, LikePostView, UnlikePostView, CommentPostView, PostCommentsView, NotificationListView, SendMessageView, InboxView, SentMessagesView,MessageDetailView, DeleteMessageView
 
 urlpatterns = [
     path('', PostListCreateView.as_view(), name='post-list-create'),
