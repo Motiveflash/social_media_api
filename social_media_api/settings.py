@@ -125,7 +125,7 @@ SIMPLE_JWT = {
 # Authentication
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  
-    'users.authentication.EmailBackend',  
+    'users.authentication.UsernameOrEmailBackend',  
 ]
 
 # CORS Settings

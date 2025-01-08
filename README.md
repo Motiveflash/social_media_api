@@ -23,9 +23,7 @@ Endpoints to handle user login, logout, and registration.
 - **Response**:
   ```json
   {
-    "id": 1,
-    "username": "newuser",
-    "email": "user@example.com"
+    "message": "User registered successfully"
   }
   ```
 - **Status Codes**:
@@ -40,13 +38,14 @@ Endpoints to handle user login, logout, and registration.
 - **Request Body**:
   ```json
   {
-    "username": "testuser",
+    "email": "user@example.com",
     "password": "securepassword"
   }
   ```
 - **Response**:
   ```json
   {
+    "refresh": "abcdef1234567890",
     "access": "abcdef1234567890"
   }
   ```

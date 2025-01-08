@@ -20,12 +20,20 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password']
 
     def create(self, validated_data):
+        username = validated_data.get('username')
+        email = validated_data.get('email')
+
+        # Check if either username or email already exists
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError('Username already taken')
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError('Email already taken')
+
         user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
+            username=username,
+            email=email,
             password=validated_data['password']
         )
-        Profile.objects.create(user=user)  # Automatically create a profile
         return user
     
 class LoginSerializer(serializers.Serializer):
