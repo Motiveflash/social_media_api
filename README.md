@@ -125,9 +125,33 @@ Endpoints for managing user profiles.
 Endpoints for creating, retrieving, updating, and deleting posts.
 Like and comment on a post
 
-### 1. Create a Post
+### 1. Lists of Posts
 - **Description**: Creates a new post for the authenticated user.
-- **Endpoint**: `/api/posts/`
+- **Endpoint**: `/`
+- **Method**: `GET`
+- **Authentication**: Not Required
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "author": "new_username",
+      "content": "This is my first post!",
+      "media": "null",
+      "like_count": 0,
+      "comment_counts": 0,
+      "timestamp": "2024-12-27T12:00:00Z",
+    }
+  ]
+  ```
+- **Status Codes**:
+  - `201 Created`: Post created.
+  - `400 Bad Request`: Invalid input.
+
+
+### 2. Create a Post
+- **Description**: Creates a new post for the authenticated user.
+- **Endpoint**: `api/posts/create/`
 - **Method**: `POST`
 - **Authentication**: Required
 - **Request Body**:
@@ -153,7 +177,7 @@ Like and comment on a post
   - `201 Created`: Post created.
   - `400 Bad Request`: Invalid input.
 
-### 2. Get a Post
+### 3. Get a Post
 - **Description**: Retrieves the details of a specific post.
 - **Endpoint**: `/api/posts/<int:pk>/`
 - **Method**: `GET`
@@ -173,7 +197,7 @@ Like and comment on a post
   - `200 OK`: Post retrieved.
   - `404 Not Found`: Post does not exist.
 
-### 3. Update a Post
+### 4. Update a Post
 - **Description**: Updates an existing post created by the authenticated user.
 - **Endpoint**: `/api/posts/<id>/`
 - **Method**: `PUT`
@@ -202,7 +226,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post does not exist.
 
-### 4. Delete a Post
+### 5. Delete a Post
 - **Description**: Deletes a specific post created by the authenticated user.
 - **Endpoint**: `/api/posts/<id>/`
 - **Method**: `DELETE`
@@ -213,7 +237,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post does not exist.
 
-### 5. Like a Post
+### 6. Like a Post
 - **Description**: like a specific post.
 - **Endpoint**: `/api/posts/like/<int:post_id>/`
 - **Method**: `POST`
@@ -231,7 +255,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post does not exist.
 
-### 6. Unlike a Post
+### 7. Unlike a Post
 - **Description**: Unlike a specific post.
 - **Endpoint**: `/api/posts/unlike/<int:post_id>/`
 - **Method**: `DELETE`
@@ -247,7 +271,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post does not exist.
 
-### 7. Create Comment
+### 8. Create Comment
 - **Description**: Comment on a specific post.
 - **Endpoint**: `/api/posts/<int:post_id>/comment/`
 - **Method**: `POST`
@@ -272,7 +296,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post does not exist.
 
-### 8. Edit Comment
+### 9. Edit Comment
 - **Description**: Edit a Comment.
 - **Endpoint**: `/api/posts/<int:post_id>/comments/<int:comment_id>/`
 - **Method**: `PUT`
@@ -297,7 +321,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post or comment does not exist.
 
-### 9. Delete Comment
+### 10. Delete Comment
 - **Description**: Delete a Comment.
 - **Endpoint**: `/api/posts/<int:post_id>/comments/<int:comment_id>/`
 - **Method**: `DELETE`
@@ -307,7 +331,7 @@ Like and comment on a post
   - `403 Forbidden`: Unauthorized access.
   - `404 Not Found`: Post or comment does not exist.
 
-### 10. View Post Comments
+### 11. View Post Comments
 - **Description**: Comment on a specific post.
 - **Endpoint**: `/api/posts/<int:post_id>/comments/`
 - **Method**: `GET`

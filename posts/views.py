@@ -31,7 +31,7 @@ class CustomPagination(PageNumberPagination):
 
 # ============ Post CRUD Views =============
 
-class PostListCreateView(generics.ListCreateAPIView):
+class PostListView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = CustomPagination
@@ -59,7 +59,6 @@ class PostListCreateView(generics.ListCreateAPIView):
         if title:
             queryset = queryset.filter(title__icontains=title)
 
-       
         # Filter by published date range (relative to today)
         if published_after:
             try:
@@ -97,11 +96,16 @@ class PostListCreateView(generics.ListCreateAPIView):
             queryset = queryset.order_by(*ordering_fields)
 
         return queryset
+    
+class PostCreateView(generics.CreateAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         # Automatically set the author to the logged-in user
         serializer.save(author=self.request.user)
 
+        
 class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
