@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
 from .models import Profile, Follow
@@ -32,7 +33,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        from django.contrib.auth import authenticate
         email = data.get('email')
         password = data.get('password')
         user = authenticate(email=email, password=password)
@@ -76,11 +76,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         return Follow.objects.filter(follower=obj.user).count()
 
     def get_followers(self, obj):
-        followers = Follow.objects.filter(following=obj.user)
+        followers = Follow.objects.filter(following=obj.user)[:10]  # Limit the number of followers returned
         return [follower.follower.username for follower in followers]
 
     def get_following(self, obj):
-        following = Follow.objects.filter(follower=obj.user)
+        following = Follow.objects.filter(follower=obj.user)[:10]  # Limit the number of following returned
         return [followed.following.username for followed in following]
 
 
