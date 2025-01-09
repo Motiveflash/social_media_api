@@ -4,6 +4,14 @@ This API provides endpoints to manage user authentication, social interactions, 
 
 ---
 
+
+## Deployment
+
+- **Description**: Deployment details for the API.
+- The API is deployed on Heroku and can be accessed at: [https://tap-chat-api-1cb8bb4f5701.herokuapp.com/](https://tap-chat-api-1cb8bb4f5701.herokuapp.com/)
+
+---
+
 ## Authentication
 
 Endpoints to handle user login, logout, and registration.
@@ -671,13 +679,6 @@ Defines the field(s) by which the posts should be ordered. Prefix the field name
 
 ---
 
-
----
-
-## Deployment
-
-- **Description**: Deployment details for the API.
-- The API is deployed on Heroku and can be accessed at: [https://socialmedia-api.herokuapp.com](https://socialmedia-api.herokuapp.com)
 
 ---
 
