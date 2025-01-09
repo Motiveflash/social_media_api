@@ -7,6 +7,10 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileSerializer
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # ============ Register User View =============
 
@@ -17,7 +21,11 @@ class RegisterUserView(generics.CreateAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'User registered successfully'}, serializer, status=status.HTTP_201_CREATED)
+            return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+        
+        # Log the error
+        logger.error(f"User registration failed: {serializer.errors}")
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
