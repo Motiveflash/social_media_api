@@ -32,7 +32,7 @@ class RegisterUserView(generics.CreateAPIView):
 
 # ============ Login and Token Views =============
 
-class UserLoginView(APIView):
+class LoginView(APIView):
     def post(self, request):
         try:
             serializer = LoginSerializer(data=request.data)
