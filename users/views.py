@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileSerializer
-from django.contrib.auth import authenticate
 
 import logging
 
@@ -34,16 +33,12 @@ class RegisterUserView(generics.CreateAPIView):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    
     def post(self, request):
         try:
-            serializer = LoginSerializer(data=request.data)
+            serializer = LoginSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
-                # Assuming you have a method to authenticate the user
-                user = authenticate(serializer.validated_data)
-                if user:
-                    return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
             # If the serializer is not valid
             logger.error(f"Login failed: {serializer.errors}")

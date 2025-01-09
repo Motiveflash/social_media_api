@@ -43,7 +43,9 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
-        user = authenticate(email=email, password=password)
+
+        # Now using the custom authentication backend
+        user = authenticate(request=self.context.get('request'), username_or_email=email, password=password)
 
         if user is None:
             raise serializers.ValidationError('Invalid email or password')
@@ -53,7 +55,6 @@ class LoginSerializer(serializers.Serializer):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
-    
 
     # ============ Profile Serializer =============
 
