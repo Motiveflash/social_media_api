@@ -33,6 +33,7 @@ class RegisterUserView(generics.CreateAPIView):
 # ============ Login and Token Views =============
 
 class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
     def post(self, request):
         try:
             serializer = LoginSerializer(data=request.data)
