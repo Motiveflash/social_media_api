@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileSerializer
+from django.db.models import Count
+
 
 import logging
 
@@ -81,31 +83,44 @@ class LogoutView(APIView):
         return Response({"detail": "Successfully logged out."}, status=200)
 
 # ============ User Profile View =============
-
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Profile.objects.filter(user=self.request.user).prefetch_related(
+            'user__followers', 'user__following'
+        ).annotate(
+            follower_count=Count('user__followers'),
+            following_count=Count('user__following')
+        )
 
     def get_object(self):
         return self.request.user.profile
 
     def update(self, request, *args, **kwargs):
         profile = self.get_object()
+        user = profile.user
 
         data = request.data
 
-        # Fields we want to allow updating
+        # Fields allowed for update
         update_fields = ['username', 'email', 'bio', 'profile_picture']
 
-        # If no fields are provided, return a bad request
+        # Check if at least one field is provided
         if not any(field in data for field in update_fields):
-            return Response({"detail": "No fields to update."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "No fields to update."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         for field in update_fields:
             if field in data:
-                setattr(profile, field, data[field])
+                if field in ['username', 'email']:
+                    setattr(user, field, data[field])
+                else:
+                    setattr(profile, field, data[field])
 
+        # Save User and Profile models
+        user.save()
         profile.save()
 
         serializer = self.get_serializer(profile)

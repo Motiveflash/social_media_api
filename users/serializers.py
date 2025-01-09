@@ -61,22 +61,23 @@ class LoginSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.EmailField(source='user.email')
-    
+
     # Fields related to the Profile model
     bio = serializers.CharField()
     profile_picture = serializers.ImageField()
-    
+
     # Follower and following counts
     follower_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
-    
+
     # Lists of followers and following users (just usernames)
     followers = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ['username', 'email', 'bio', 'profile_picture', 'follower_count', 'following_count', 'followers', 'following']
+        fields = ['username', 'email', 'bio', 'profile_picture', 
+                  'follower_count', 'following_count', 'followers', 'following']
 
     def get_follower_count(self, obj):
         return Follow.objects.filter(following=obj.user).count()
@@ -85,13 +86,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         return Follow.objects.filter(follower=obj.user).count()
 
     def get_followers(self, obj):
-        followers = Follow.objects.filter(following=obj.user)[:10]  # Limit the number of followers returned
+        followers = Follow.objects.filter(following=obj.user)[:10]
         return [follower.follower.username for follower in followers]
 
     def get_following(self, obj):
-        following = Follow.objects.filter(follower=obj.user)[:10]  # Limit the number of following returned
+        following = Follow.objects.filter(follower=obj.user)[:10]
         return [followed.following.username for followed in following]
-
 
 # ============ Follow Serializer =============
 

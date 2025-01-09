@@ -40,7 +40,7 @@ Endpoints to handle user login, logout, and registration.
 
 
 ### 2. Login
-- **Description**:Login with either username or email to Authenticates the user and returns the access token.
+- **Description**: Login with either username or email to Authenticates the user and returns the access token.
 - **Endpoint**: `/api/users/login/`
 - **Method**: `POST`
 - **Request Body**:
