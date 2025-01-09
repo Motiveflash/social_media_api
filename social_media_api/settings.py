@@ -126,8 +126,6 @@ AUTHENTICATION_BACKENDS = [
     'users.authentication.UsernameOrEmailBackend',  
 ]
 
-# CORS Settings
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
 
 # HTTPS and Cookie Security
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
