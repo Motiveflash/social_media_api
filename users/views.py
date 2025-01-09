@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileSerializer
+from django.contrib.auth import authenticate
 
 import logging
 
@@ -31,18 +32,26 @@ class RegisterUserView(generics.CreateAPIView):
 
 # ============ Login and Token Views =============
 
-class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
-
+class UserLoginView(APIView):
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        
-        # Log the error
-        logger.error(f"User login failed: {serializer.errors}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = LoginSerializer(data=request.data)
+            if serializer.is_valid():
+                # Assuming you have a method to authenticate the user
+                user = authenticate(serializer.validated_data)
+                if user:
+                    return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+            # If the serializer is not valid
+            logger.error(f"Login failed: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Log unexpected errors
+            logger.error(f"Unexpected error during login: {str(e)}")
+            return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AutoRefreshView(TokenRefreshView):
     permission_classes = [permissions.IsAuthenticated]
