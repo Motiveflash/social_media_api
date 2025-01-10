@@ -6,7 +6,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('token/refresh/', AutoRefreshView.as_view(), name='token_refresh'),
-    path('profile/', UserProfileView.as_view(), name='profile'),
+    path('me/profile/', UserProfileView.as_view(), name='profile'),
 
     path('follow/<str:username>/', FollowUserView.as_view(), name='follow-user'),
     path('unfollow/<str:username>/', UnfollowUserView.as_view(), name='unfollow-user'),

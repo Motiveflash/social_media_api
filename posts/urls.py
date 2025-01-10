@@ -3,7 +3,7 @@ from .views import PostListView, PostCreateView, PostRetrieveUpdateDestroyView, 
 
 urlpatterns = [
     path('', PostListView.as_view(), name='post-list'),
-    path('api/posts/create/', PostListView.as_view(), name='post-create'),
+    path('api/posts/create/', PostCreateView.as_view(), name='post-create'),
     path('api/posts/<int:pk>/', PostRetrieveUpdateDestroyView.as_view(), name='post-detail'),
     path('api/posts/feed/', FeedView.as_view(), name='feed'),
 

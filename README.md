@@ -75,8 +75,8 @@ Endpoints to handle user login, logout, and registration.
 Endpoints for managing user profiles.
 
 ### 1. Get User Profile
-- **Description**: Retrieves the profile of a current user.
-- **Endpoint**: `/api/users/profile/`
+- **Description**: Retrieves the profile of the current user.
+- **Endpoint**: `/api/users/me/profile/`
 - **Method**: `GET`
 - **Response**:
   ```json
@@ -97,7 +97,7 @@ Endpoints for managing user profiles.
 
 ### 2. Update User Profile
 - **Description**: Updates the profile of the authenticated user.
-- **Endpoint**: `/api/users/profile/`
+- **Endpoint**: `/api/users/me/profile/`
 - **Method**: `PUT`
 - **Authentication**: Required
 - **Request Body**:

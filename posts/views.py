@@ -94,8 +94,8 @@ class PostListView(generics.ListAPIView):
                 if field.lstrip('-') not in allowed_fields:
                     raise ValidationError(f"Invalid ordering field '{field}'. Allowed fields are {allowed_fields}.")
             queryset = queryset.order_by(*ordering_fields)
-
         return queryset
+    
     
 class PostCreateView(generics.CreateAPIView):
     serializer_class = PostSerializer
@@ -122,8 +122,6 @@ class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user != instance.author:
             raise PermissionError()
         instance.delete()
-
-
 
 
 # ============ Feed and Pagination =============
@@ -186,7 +184,6 @@ class UnlikePostView(APIView):
             like.delete()
             return Response({"detail": "You have unliked this post."}, status=status.HTTP_200_OK)
         return Response({"detail": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
-    
 
 
 # ============ Comment Views =============

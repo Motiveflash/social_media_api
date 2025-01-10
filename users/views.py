@@ -79,7 +79,7 @@ class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # Clients should delete the JWT token from their storage
+        # Delete the clients JWT token from their storage
         return Response({"detail": "Successfully logged out."}, status=200)
 
 # ============ User Profile View =============
