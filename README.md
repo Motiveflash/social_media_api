@@ -98,7 +98,7 @@ Endpoints for managing user profiles.
 ### 2. Update User Profile
 - **Description**: Updates the profile of the authenticated user.
 - **Endpoint**: `/api/users/me/profile/`
-- **Method**: `PUT`
+- **Method**: `PUT`, `PATCH`
 - **Authentication**: Required
 - **Request Body**:
   ```json
@@ -109,15 +109,18 @@ Endpoints for managing user profiles.
   ```
 - **Response**:
   ```json
-  {
-    "username": "new_username",
-    "email": "test@example.com",
-    "bio": "Updated bio text",
-    "profile_picture": null,
-    "follower_count": 0,
-    "following_count": 0,
-    "followers": [],
-    "following": []
+ {
+    "detail": "Profile updated successfully.",
+    "profile": {
+      "username": "newusername",
+      "email": "newemail@example.com",
+      "bio": "Updated bio",
+      "profile_picture": "profile_image_url",
+      "follower_count": 10,
+      "following_count": 5,
+      "followers": ["follower1", "follower2"],
+      "following": ["user1", "user2"]
+    }
   }
   ```
 - **Status Codes**:

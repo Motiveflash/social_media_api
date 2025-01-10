@@ -312,7 +312,6 @@ class SendMessageView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-# Inbox View (excluding recipient field)
 class InboxView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -341,6 +340,10 @@ class MessageDetailView(APIView):
 
         if not message:
             return Response({"detail": "Message not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Ensure the requesting user is either the sender or the recipient of the message
+        if message.sender != request.user and message.recipient != request.user:
+            return Response({"detail": "You do not have permission to view this message."}, status=status.HTTP_403_FORBIDDEN)
 
         # Mark message as read
         if not message.is_read:

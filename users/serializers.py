@@ -48,7 +48,8 @@ class LoginSerializer(serializers.Serializer):
         user = authenticate(request=self.context.get('request'), username_or_email=email, password=password)
 
         if user is None:
-            raise serializers.ValidationError('Invalid email or password')
+            raise serializers.ValidationError({"error": "Invalid credentials. Please check your email and password."})
+
 
         refresh = RefreshToken.for_user(user)
         return {

@@ -10,7 +10,6 @@ from django.db.models import Count
 
 
 import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +22,8 @@ class RegisterUserView(generics.CreateAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+            return Response({
+                'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
         
         # Log the error
         logger.error(f"User registration failed: {serializer.errors}")
@@ -109,8 +109,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
         # Check if at least one field is provided
         if not any(field in data for field in update_fields):
-            return Response({"detail": "No fields to update."}, 
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "No fields to update."},  status=status.HTTP_400_BAD_REQUEST)
 
         for field in update_fields:
             if field in data:
@@ -124,9 +123,12 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         profile.save()
 
         serializer = self.get_serializer(profile)
-        return Response(serializer.data)
-
-
+        logger.info(f"User {request.user.id} updated their profile: {data}")
+        return Response({
+            "detail": "Profile updated successfully.",
+            "profile": serializer.data
+        })
+    
 # ============ Follow User Views =============
 
 class FollowUserView(APIView):
@@ -171,7 +173,6 @@ class UserFollowersCountView(APIView):
             "followers_count": followers_count
         })
 
-
 class UserFollowingCountView(APIView):
     def get(self, request, username, *args, **kwargs):
         user = User.objects.filter(username=username).first()
@@ -183,7 +184,6 @@ class UserFollowingCountView(APIView):
             "username": username,
             "following_count": following_count
         })
-
 
 class UserFollowersListView(APIView):
     def get(self, request, username, *args, **kwargs):
@@ -198,7 +198,6 @@ class UserFollowersListView(APIView):
             "username": username,
             "followers": followers_list
         })
-
 
 class UserFollowingListView(APIView):
     def get(self, request, username, *args, **kwargs):
