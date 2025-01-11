@@ -38,15 +38,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    username_or_email = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     def validate(self, data):
-        email = data.get('email')
+        username_or_email = data.get('username_or_email')
         password = data.get('password')
 
         # Authenticate using email or username
-        user = authenticate(request=self.context.get('request'), username=email, password=password)
+        user = authenticate(
+            request=self.context.get('request'),
+            username_or_email=username_or_email,
+            password=password
+        )
 
         if user is None:
             raise serializers.ValidationError({"error": "Invalid credentials. Please check your email and password."})

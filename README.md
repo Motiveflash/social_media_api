@@ -46,7 +46,7 @@ Endpoints to handle user login, logout, and registration.
 - **Request Body**:
   ```json
   {
-    "email": "user@example.com",
+    "username_or_email": "user@example.com",
     "password": "securepassword"
   }
   ```
