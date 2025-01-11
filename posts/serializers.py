@@ -46,7 +46,7 @@ class DirectMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectMessage
-        fields = ['id', 'sender', 'content', 'is_read', 'timestamp']
+        fields = ['id', 'sender', 'recipient', 'content', 'is_read', 'timestamp']
 
 # Serializer for inbox (excluding recipient)
 class InboxMessageSerializer(serializers.ModelSerializer):
@@ -58,7 +58,6 @@ class InboxMessageSerializer(serializers.ModelSerializer):
 
 # Serializer for sent messages (including recipient)
 class SentMessageSerializer(serializers.ModelSerializer):
-    sender = serializers.ReadOnlyField(source='sender.username')
     recipient = serializers.ReadOnlyField(source='recipient.username')
 
     class Meta:
