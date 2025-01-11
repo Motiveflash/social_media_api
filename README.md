@@ -109,19 +109,19 @@ Endpoints for managing user profiles.
   ```
 - **Response**:
   ```json
- {
-    "detail": "Profile updated successfully.",
-    "profile": {
-      "username": "newusername",
-      "email": "newemail@example.com",
-      "bio": "Updated bio",
-      "profile_picture": "profile_image_url",
-      "follower_count": 10,
-      "following_count": 5,
-      "followers": ["follower1", "follower2"],
-      "following": ["user1", "user2"]
+  {
+      "detail": "Profile updated successfully.",
+      "profile": {
+        "username": "newusername",
+        "email": "newemail@example.com",
+        "bio": "Updated bio",
+        "profile_picture": "profile_image_url",
+        "follower_count": 10,
+        "following_count": 5,
+        "followers": ["follower1", "follower2"],
+        "following": ["user1", "user2"]
+      }
     }
-  }
   ```
 - **Status Codes**:
   - `200 OK`: Profile updated.
@@ -396,41 +396,10 @@ Endpoints for managing follow relationships between users.
 - **Status Codes**:
   - `200 OK`: Unfollowed user.
 
-### 3. Number of followers 
-- **Description**: Get the follow-count of a specific user.
-- **Endpoint**: `api/users/<str:username>/followers-count/`
-- **Method**: `GET`
-- **Authentication**: Not Required
-- **Response**:
-  ```json
-  {
-    "username": "random user",
-    "followers_count": 1
-  }
-  ```
-- **Status Codes**:
-  - `200 OK`: Number of followers.
-  - `404 Not Found`: User dose not exist
-
-### 4. Number of following 
-- **Description**: Get the following-count of a specific user.
-- **Endpoint**: `api/users/<str:username>/followers-count/`
-- **Method**: `GET`
-- **Authentication**: Not Required
-- **Response**:
-  ```json
-  {
-    "username": "random user",
-    "following_count": 4
-  }
-  ```
-- **Status Codes**:
-  - `200 OK`: Number of following.
-  - `404 Not Found`: User dose not exist
 
 ### 5. Followers list 
 - **Description**: Get the followers list of a specific user.
-- **Endpoint**: `api/users/<str:username>/followers-list/`
+- **Endpoint**: `api/users/followers/<str:username>/`
 - **Method**: `GET`
 - **Authentication**: Not Required
 - **Response**:
@@ -447,7 +416,7 @@ Endpoints for managing follow relationships between users.
 
 ### 5. Following list
 - **Description**: Get the following list of a specific user.
-- **Endpoint**: `api/users/<str:username>/following-list/`
+- **Endpoint**: `api/users/following/<str:username>/`
 - **Method**: `GET`
 - **Authentication**: Not Required
 - **Response**:

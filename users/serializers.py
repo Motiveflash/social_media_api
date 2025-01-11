@@ -6,11 +6,11 @@ from .models import Profile, Follow
 
 
 # ============ User Serializer =============
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -35,7 +35,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-    
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -44,12 +45,11 @@ class LoginSerializer(serializers.Serializer):
         email = data.get('email')
         password = data.get('password')
 
-        # Now using the custom authentication backend
-        user = authenticate(request=self.context.get('request'), username_or_email=email, password=password)
+        # Authenticate using email or username
+        user = authenticate(request=self.context.get('request'), username=email, password=password)
 
         if user is None:
             raise serializers.ValidationError({"error": "Invalid credentials. Please check your email and password."})
-
 
         refresh = RefreshToken.for_user(user)
         return {
@@ -57,21 +57,18 @@ class LoginSerializer(serializers.Serializer):
             'access': str(refresh.access_token),
         }
 
-    # ============ Profile Serializer =============
 
+# ============ Profile Serializer =============
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.EmailField(source='user.email')
 
-    # Fields related to the Profile model
-    bio = serializers.CharField()
-    profile_picture = serializers.ImageField()
+    bio = serializers.CharField(default='', allow_blank=True)
+    profile_picture = serializers.ImageField(default=None)
 
-    # Follower and following counts
     follower_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
 
-    # Lists of followers and following users (just usernames)
     followers = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
 
@@ -87,15 +84,19 @@ class ProfileSerializer(serializers.ModelSerializer):
         return Follow.objects.filter(follower=obj.user).count()
 
     def get_followers(self, obj):
-        followers = Follow.objects.filter(following=obj.user)[:10]
+        request = self.context.get('request')
+        limit = int(request.query_params.get('limit', 10)) if request else 10
+        followers = Follow.objects.filter(following=obj.user)[:limit]
         return [follower.follower.username for follower in followers]
 
     def get_following(self, obj):
-        following = Follow.objects.filter(follower=obj.user)[:10]
+        request = self.context.get('request')
+        limit = int(request.query_params.get('limit', 10)) if request else 10
+        following = Follow.objects.filter(follower=obj.user)[:limit]
         return [followed.following.username for followed in following]
 
-# ============ Follow Serializer =============
 
+# ============ Follow Serializer =============
 class FollowSerializer(serializers.ModelSerializer):
     follower = serializers.ReadOnlyField(source='follower.username')
     following = serializers.ReadOnlyField(source='following.username')
