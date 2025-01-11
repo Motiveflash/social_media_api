@@ -79,6 +79,7 @@ class LogoutView(APIView):
             return Response({"detail": "Logout failed."}, status=400)
 
 # ============ User Profile View ============
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -91,8 +92,10 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         try:
-            return self.request.user.profile
+            profile = self.request.user.profile
+            return profile
         except Profile.DoesNotExist:
+            logger.error(f"Profile not found for user: {self.request.user.id}")
             raise Http404("User has no profile.")
 
     def get(self, request, *args, **kwargs):
@@ -102,6 +105,11 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         profile = self.get_object()
+
+        # Check if the profile belongs to the authenticated user
+        if profile.user != request.user:
+            return Response({"detail": "You do not have permission to update this profile."}, status=status.HTTP_403_FORBIDDEN)
+
         user = profile.user
         data = request.data
         update_fields = ['username', 'email', 'bio', 'profile_picture']
@@ -129,7 +137,22 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             "detail": "Profile updated successfully.",
             "profile": serializer.data
         })
+
+
+    def destroy(self, request, *args, **kwargs):
+        profile = self.get_object()
+
+        # Check if the profile belongs to the authenticated user
+        if profile.user != request.user:
+            return Response({"detail": "You do not have permission to delete this profile."}, status=status.HTTP_403_FORBIDDEN)
+
+        profile.delete()
+        logger.info(f"User {request.user.id} deleted their profile.")
+        return Response({"detail": "Profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    
+
 # ============ Follow and Unfollow Views ============
+
 class FollowUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
