@@ -1,4 +1,6 @@
 from rest_framework import generics, permissions, status
+from django.http import Http404
+from django.core.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
@@ -88,7 +90,15 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         )
 
     def get_object(self):
-        return self.request.user.profile
+        try:
+            return self.request.user.profile
+        except Profile.DoesNotExist:
+            raise Http404("User has no profile.")
+
+    def get(self, request, *args, **kwargs):
+        profile = self.get_object()
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         profile = self.get_object()
@@ -103,6 +113,10 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             if field in data:
                 if field in ['username', 'email']:
                     setattr(user, field, data[field])
+                    try:
+                        user.full_clean()  # Ensures validation for fields like username and email
+                    except ValidationError as e:
+                        return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     setattr(profile, field, data[field])
 
@@ -115,7 +129,6 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             "detail": "Profile updated successfully.",
             "profile": serializer.data
         })
-
 # ============ Follow and Unfollow Views ============
 class FollowUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
